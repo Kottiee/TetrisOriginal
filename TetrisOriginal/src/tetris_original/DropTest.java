@@ -26,7 +26,7 @@ public class DropTest extends JPanel implements KeyListener {
 	ScheduleTask task;
 
 	private int WIDTHpx = 300;
-	private int HEIGHTpx = 500;
+	private int HEIGHTpx = 600;
 	private int WIDTH = 10;
 	private int HEIGHT = 20;
 	private int blockWPx = 0;
@@ -48,13 +48,7 @@ public class DropTest extends JPanel implements KeyListener {
 		blockHPx = HEIGHTpx/HEIGHT;
 		board = new int[HEIGHT][WIDTH];
 		newPiece();
-		for(int[] n:board) {
-
-			for(int i:n) {
-				System.out.print(i);
-			}
-			System.out.println("");
-		}
+	
 
 
 		System.out.println(blockWPx);
@@ -81,46 +75,74 @@ public class DropTest extends JPanel implements KeyListener {
 		}
 		return max;
 	}
-	//return minimum y coord of Piece(下端の検出）
+	//return max y coord of Piece(下端の検出）
 	public int minPY() {
 		int min = piece[0][1];
 		for(int i=0; i<4; i++) {
 			min = Math.min(min, piece[i][1]);
 		}
-		return min;
+		min = Math.abs(min);
+		return min+1;
 	}
 
 	//create new Piece .board[][]のIndexはそれぞれx,y座標を表しており、piece[][]のIndexもそれぞれx,y座標を表しているのでこのようになる。
 	public void newPiece() {
 		curX = WIDTH/2;
 		curY = 0;
-//		for(int i=0; i<4; i++) {
-//			board[piece[i][1]+1][WIDTH/2+(piece[i][0])] = 1;
-//		}
-
-
 	}
 
 	//Rotation
 
 	//tryMove and move
 	public void tryMove(int x, int y) {
-		System.out.println(curX+maxPX()+x);
-
+//		System.out.println("curx"+curX);
+//		System.out.println("cury"+curY);
+		
 		if (!(0>(curX+maxPX()+x)||(curX+maxPX()+x)>=WIDTH-1)) {
-			curX += x;
+			
+			if (!(HEIGHT<=curY+minPY()+y)) {
+				curY += y;
+				curX += x;
+			}
+			else {
+				dropped();
+			}
 		}
-		curY += y;
+
+		for (int i = 0; i<4; i++) {
+			if(board[curY+piece[i][1]+2][curX+piece[i][0]] == 1) {
+				dropped();
+				
+			}
+		}
+		
+		
 		repaint();
 
 	}
 	//dropping
-//	public void dropping() {
-//		curY +=1;
-//		for(int i=0; i<4; i++) {
-//			board[piece[i][1]+1][WIDTH/2+(piece[i][0])] = 1;
+	public void dropping() {
+		tryMove(0,1);
+	}
+	//dropped
+	public void dropped() {
+		for(int i=0; i<4; i++) {
+			board[curY+piece[i][1]+1][curX+piece[i][0]] = 1;
+		}
+		
+		//debug
+//		for(int[] n:board) {
+//
+//			for(int i:n) {
+//				System.out.print(i);
+//			}
+//			System.out.println("");
 //		}
-//	}
+//		System.out.println("");
+//		
+		newPiece();
+		
+	}
 
 	//TimerTask run method Override
 
@@ -131,18 +153,19 @@ public class DropTest extends JPanel implements KeyListener {
 		g.setColor(Color.black);
 
 		//Draw pieces on board(piled ones)
-//		for(int x = 0; x<board.length; x++) {
-//			for(int y=0; y<board[x].length; y++) {
-//				if(board[x][y]==1) {
-//					g.fillRect(x, y, blockWPx, blockHPx);
-//				}
-//			}
-//		}
+		for(int y=0; y<board.length; y++) {
+			for(int x=0; x<board[y].length; x++) {
+				if(board[y][x]==1) {
+					g.fillRect((x*blockWPx)+1, (y*blockHPx)+1, blockWPx-2, blockHPx-2);
+				}
+			}
+		}
 		//Draw current moving pice
 		for(int i = 0; i<4; i++) {
 			int x = curX + piece[i][0];
 			int y = curY + piece[i][1];
-			g.fillRect(x*blockWPx, y*blockHPx, blockWPx, blockHPx);
+//			System.out.println(x + " " + y);
+			g.fillRect((x*blockWPx)+1, (y*blockHPx)+1, blockWPx-2, blockHPx-2);
 		}
 	}
 	//
@@ -185,6 +208,7 @@ public class DropTest extends JPanel implements KeyListener {
 	private class ScheduleTask extends TimerTask{
 		@Override
 		public void run() {
+			dropping();
 
 
 //			System.out.println("timer test");
