@@ -29,8 +29,7 @@ public class DropTest extends JPanel implements KeyListener {
 	private int HEIGHTpx = 600;
 	private int WIDTH = 10;
 	private int HEIGHT = 20;
-	private int blockWPx = 0;
-	private int blockHPx = 0;
+
 
 	/**Pieceの現在位置X*/
 	private int curX;
