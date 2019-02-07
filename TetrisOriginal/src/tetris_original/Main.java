@@ -1,16 +1,13 @@
 package tetris_original;
 
-import java.awt.BorderLayout;
-
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 public class Main {
 //	private JLabel status;
-	
+
 //	public JLabel getStatusLabel() {
 //		return status;
-//		
+//
 //	}
 	public void init() {
 		JFrame frame = new JFrame();

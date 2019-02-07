@@ -24,12 +24,7 @@ public class Shape {
 
 	public Shape() {
 		setRandomPiece();
-		for(int[] i: piece) {
-			for(int n: i) {
-				System.out.print(n+",");
-			}
-			System.out.println("");
-		}
+
 
 	}
 
@@ -46,22 +41,8 @@ public class Shape {
 		int x = new Random().nextInt(coordsTable.length);
 		setPiece(x);
 	}
-	//y=x, x=(-y) で回転できる
-	public void rotation() {
-		for(int i=0; i<4;i++) {
-		
-			int tempY = -(piece[i][1]);
-			piece[i][1] = piece[i][0];
-			piece[i][0] = tempY; 
-		}
-		for(int[] i: piece) {
-			for(int n: i) {
-				System.out.print(n+",");
-			}
-			System.out.println("");
-		}
-	}
-//	
+
+//
 //	/**coords配列の0番（ｘ座標）の値をセットする
 //	 * @param index
 //	 * @param x
@@ -78,8 +59,8 @@ public class Shape {
 //		return piece[index][0];}
 //	public int getY(int index) {
 //		return piece[index][1];}
-//	
-//	
+//
+//
 //	/**This methodは、Coordの回転後のXに回転前のY座標を、回転後のY座標に回転前の−Xを代入して回転を表現している。
 //     * @return X,y座標を編集したShapeインスタンスObject
 //     */

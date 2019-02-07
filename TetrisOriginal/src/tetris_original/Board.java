@@ -1,12 +1,14 @@
 package tetris_original;
 
-import java.awt.BorderLayout;
+
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -31,8 +33,13 @@ public class Board extends JPanel implements KeyListener {
 	private int HEIGHT = 20;
 	private int blockPx = 0;
 
+	/**全ての回転の形を格納するリスト*/
+	private ArrayList<int[][]> allPieceVal =new  ArrayList<int[][]>();
+	/**0ー３まで*/
+	private int curRotation;
 
-	Shape curPiece;
+	private Shape shape;
+	private int[][] curPiece;
 	/**Pieceの現在位置X*/
 	private int curX;
 	private int curY;
@@ -46,17 +53,16 @@ public class Board extends JPanel implements KeyListener {
 		setFocusable(true);
 		blockPx = board_W / WIDTH;
 		board = new int[HEIGHT][WIDTH];
-		
-		status = new JLabel("test");
-		
-		add(status,new BorderLayout().SOUTH);
-		
+
+//		status = new JLabel("test");
+//		add(status,new BorderLayout().SOUTH);
+
+		//Pieceを初期化
 		newPiece();
-	
+
 		addKeyListener(this);
 		timer = new Timer();
 		task = new ScheduleTask();
-
 		timer.scheduleAtFixedRate(task, 300, 300);
 
 	}
@@ -68,53 +74,145 @@ public class Board extends JPanel implements KeyListener {
 		return new Dimension(board_W,board_H);
 	}
 
+	//create new Piece .board[][]のIndexはそれぞれx,y座標を表しており、piece[][]のIndexもそれぞれx,y座標を表しているのでこのようになる。
+	public void newPiece() {
+		shape = new Shape();
+
+
+		curPiece = shape.getPiece();
+
+		setAllVal(curPiece);
+
+		//DEBUG DEBUG
+		for(int[][] i: allPieceVal) {
+			for(int[] n: i) {
+				for(int x: n)
+				System.out.print(x+",");
+			}
+			System.out.print("..");
+		}
+		System.out.println("");
+
+		curRotation = 0;
+
+		curX = WIDTH / 2;
+		curY = 2;
+		System.out.println(curPiece + " NEWWW");
+	}
+
+
+	/**一つのピースに対する全ての回転の形をArraylistに格納
+	 * @param piece
+	 */
+	public void setAllVal(int[][] piece) {
+		allPieceVal.add(piece);
+		for(int i=0; i<3; i++) {
+			int[][] temp = computeRotation(allPieceVal.get(i));
+			allPieceVal.add(temp);
+//			for(int[] x: allPieceVal.get(i)) {
+//				for(int n: x) {
+//					System.out.print(n+",");
+//				}
+//				System.out.print("..");
+//			}
+//			System.out.println("");
+		}
+
+
+
+
+	}
+
+	/**次の回転の形をcurPieceに代入*/
+	public void rotation() {
+		if (curRotation==2) {
+
+			curRotation = 0;
+			this.curPiece = allPieceVal.get(curRotation);
+		}
+		else{
+			curRotation += 1;
+			this.curPiece = allPieceVal.get(curRotation);
+
+		}
+		//DEBUG DEBUG
+//		for(int[] i: curPiece) {
+//			for(int n: i) {
+//				System.out.print(n+",");
+//			}
+//			System.out.print("..");
+//		}
+//		System.out.println("");
+
+	}
+
 
 	//return current Piece max width (はみ出さないように
 	public int minX() {
-		int min = curPiece.getPiece()[0][0];
+		int min = curPiece[0][0];
 		for (int i = 0; i < 4; i++) {
-			min = Math.min(min, curPiece.getPiece()[i][0]);
+			min = Math.min(min, curPiece[i][0]);
 		}
 		return min;
 	}
 	public int maxX() {
-		int max = curPiece.getPiece()[0][0];
+		int max = curPiece[0][0];
 		for (int i = 0; i < 4; i++) {
-			max = Math.max(max, curPiece.getPiece()[i][0]);
+			max = Math.max(max, curPiece[i][0]);
 		}
 		return max;
 	}
 
 	//return max y coord of Piece(下端の検出）
 	public int maxY() {
-		int max = curPiece.getPiece()[0][1];
+		int max = curPiece[0][1];
 		for (int i = 0; i < 4; i++) {
-			max = Math.max(max, curPiece.getPiece()[i][1]);
+			max = Math.max(max, curPiece[i][1]);
 		}
 		return max;
 	}
 
-	//create new Piece .board[][]のIndexはそれぞれx,y座標を表しており、piece[][]のIndexもそれぞれx,y座標を表しているのでこのようになる。
-	public void newPiece() {
-		curPiece = new Shape();
-		curX = WIDTH / 2;
-		curY = 2;
+
+	//
+	/**y=x, x=(-y) の変換を行っている
+	 *
+	 */
+	public int[][] computeRotation(int[][] piece) {
+
+		for(int i=0; i<4;i++) {
+
+			int tempY = -(piece[i][1]);
+			piece[i][1] = piece[i][0];
+			piece[i][0] = tempY;
+
+		}
+
+//		for(int[] i: curPiece) {
+//			for(int n: i) {
+//				System.out.print(n+",");
+//			}
+//			System.out.print("..");
+//		}
+//		System.out.println("");
+
+
+		return piece;
 	}
 
-	//Rotation
-	
+
+
 	//Blockが次の移動先でかぶるかどうか。４つすべて見ている。
 	public boolean hitCheck(int newX, int newY) {
 		for(int i=0; i<4; i++) {
-			if(board[curPiece.getPiece()[i][1]+curY+newY]
-					[curPiece.getPiece()[i][0]+curX+newX]==1) {
+			if(board[curPiece[i][1]+curY+newY]
+					[curPiece[i][0]+curX+newX]==1) {
 				return false;
 			}
-			
+
 		}
 		return true;
 	}
-	
+
 
 
 	/** 左右方向移動チェックと移動
@@ -124,13 +222,13 @@ public class Board extends JPanel implements KeyListener {
 	public void tryMoveLR(int newX, int newY) {
 		//			System.out.println("curx"+curX);
 		//			System.out.println("cury"+curY);
-		
+
 		//newXは絶対値ではないのでそのまま足していいはず？
 		int leftX = curX+minX()+newX;
 		int rightX = curX+maxX()+newX;
-		
+
 		int bottomY = curY+maxY()+newY;
-		
+
 		//これがTrueなら次の移動先は少なくともボードの範囲内
 		if ((0 <= leftX && rightX <= WIDTH - 1)
 				&& bottomY<=HEIGHT-1 ){
@@ -141,38 +239,45 @@ public class Board extends JPanel implements KeyListener {
 			}
 		}
 	}
+
+	/**下に移動できるかどうか判定したのちcurYを更新
+	 * FalseならDroppedを呼ぶ
+	 * @param newX hitCheckに渡すために必要
+	 * @param newY
+	 */
 	public void tryMoveDown(int newX, int newY) {
 		int bottomY = curY+maxY()+newY;
 		if(bottomY<=HEIGHT-1&&(hitCheck(newX,newY))) {
 			curY+=1;
-			
+
 		}
 		else {
 			dropped();
 		}
 		repaint();
-		
+
 	}
 
-	//dropping
-	/** 自動で落ちる動作
-	 *
-	 */
+
+	/** 自動で落ちる動作*/
 	public void dropping() {
 		curY+=1;
 		repaint();
-		
-	}
 
-	//dropped
+	}
+	/**Pieceの着地処理。着地点のboard座標に1を代入し、newPieceで新しいPieceを作る*/
 	public void dropped() {
 		for (int i = 0; i < 4; i++) {
-			board[curY + curPiece.getPiece()[i][1]]
-					[curX + curPiece.getPiece()[i][0]] = 1;
+			board[curY + curPiece[i][1]]
+					[curX + curPiece[i][0]] = 1;
 		}
 		newPiece();
 
 	}
+
+	/**デバッグ用の座標表示システム
+	 * @param g
+	 */
 	public void debugPaint(Graphics g) {
 		//Draw Grid lines for DEBUG
 		for(int i=0; i<WIDTH; i++) {
@@ -195,8 +300,10 @@ public class Board extends JPanel implements KeyListener {
 		g.drawString(String.valueOf(curX+" "+curY), 30, board_H-30);
 	}
 
-	//Paint method　
-	public void paint(Graphics g) {
+
+	public void paintComponent(Graphics g) {
+		//この一文は重要。これがないと前のPaintが残ってしまう。
+		super.paintComponent(g);
 		debugPaint(g);
 		//Draw Dropped Pieces
 		g.setColor(Color.black);
@@ -207,11 +314,11 @@ public class Board extends JPanel implements KeyListener {
 				}
 			}
 		}
-		
+
 		//Draw current moving piece
 		for (int i = 0; i < 4; i++) {
-			int x = curX + curPiece.getPiece()[i][0];
-			int y = curY + curPiece.getPiece()[i][1];
+			int x = curX + curPiece[i][0];
+			int y = curY + curPiece[i][1];
 			//				System.out.println(x + " " + y);
 			g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
 		}
@@ -229,22 +336,23 @@ public class Board extends JPanel implements KeyListener {
 
 		case (KeyEvent.VK_S):
 			tryMoveDown(0, 1);
+
 			break;
 
 		case (KeyEvent.VK_D):
 			tryMoveLR(1, 0);
 			break;
-		
+
 		//rotation
 		case (KeyEvent.VK_K):
-			curPiece.rotation();
+			rotation();
 			break;
 		//change Piece(DEBUG)
-		case (KeyEvent.VK_I):
-			curPiece.setRandomPiece();
-			break;
+//		case (KeyEvent.VK_I):
+//			curPiece.setRandomPiece();
+//			break;
 		}
-		
+
 	}
 
 	@Override
@@ -261,13 +369,8 @@ public class Board extends JPanel implements KeyListener {
 	private class ScheduleTask extends TimerTask{
 		@Override
 		public void run() {
-			tryMoveDown(0, 1);
-//			dropping();
-//			status.setText(String.valueOf(curX));
-//			System.out.println(status.getText());
-//			
-			
-//			System.out.println("timer test");
+//			tryMoveDown(0, 1);
+
 		}
 	}
 
