@@ -15,7 +15,7 @@ public class Main {
 //		status = new JLabel("test");
 //		frame.add(status, new BorderLayout().CENTER);
 		frame.add(board);
-//		frame.add(board.status);
+//		frame.add(board.status);X
 		frame.setSize(board.getWHSize());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

@@ -34,7 +34,7 @@ public class Board extends JPanel implements KeyListener {
 	private int blockPx = 0;
 
 	/**全ての回転の形を格納するリスト*/
-	private ArrayList<int[][]> allPieceVal =new  ArrayList<int[][]>();
+	private ArrayList<int[][]> allRotations =new  ArrayList<int[][]>();
 	/**0ー３まで*/
 	private int curRotation;
 
@@ -78,20 +78,20 @@ public class Board extends JPanel implements KeyListener {
 	public void newPiece() {
 		shape = new Shape();
 
-
+		//動作するピースの二次元配列をShapeオブジェクトから取得
 		curPiece = shape.getPiece();
 
 		setAllVal(curPiece);
 
 		//DEBUG DEBUG
-		for(int[][] i: allPieceVal) {
-			for(int[] n: i) {
-				for(int x: n)
-				System.out.print(x+",");
-			}
-			System.out.print("..");
-		}
-		System.out.println("");
+//		for(int[][] i: allRotations) {
+//			for(int[] n: i) {
+//				for(int x: n)
+//				System.out.print(x+",");
+//			}
+//			System.out.print("..");
+//		}
+//		System.out.println("");
 
 		curRotation = 0;
 
@@ -105,11 +105,13 @@ public class Board extends JPanel implements KeyListener {
 	 * @param piece
 	 */
 	public void setAllVal(int[][] piece) {
-		allPieceVal.add(piece);
+		this.allRotations.add(piece);
+
+		//ここまでは正常に動いてる（allPieceValに正しい値が入ってる）
 		for(int i=0; i<3; i++) {
-			int[][] temp = computeRotation(allPieceVal.get(i));
-			allPieceVal.add(temp);
-//			for(int[] x: allPieceVal.get(i)) {
+			int[][] temp = computeRotation(this.allRotations.get(i));
+			this.allRotations.add(temp);
+//			for(int[] x: allPieceVal.get(i+1)) {
 //				for(int n: x) {
 //					System.out.print(n+",");
 //				}
@@ -117,22 +119,30 @@ public class Board extends JPanel implements KeyListener {
 //			}
 //			System.out.println("");
 		}
+		for(int[][] i: allRotations) {
+			for(int[] n: i) {
+				for(int x: n)
+				System.out.print(x+",");
+			}
+			System.out.print("..");
+		}
+		System.out.println("");
 
 
 
 
 	}
 
-	/**次の回転の形をcurPieceに代入*/
-	public void rotation() {
+	/**curRotation変数をインクリメントし、次の回転の形をcurPieceに代入、*/
+	public void nextRotation() {
 		if (curRotation==2) {
 
 			curRotation = 0;
-			this.curPiece = allPieceVal.get(curRotation);
+			this.curPiece = allRotations.get(curRotation);
 		}
 		else{
 			curRotation += 1;
-			this.curPiece = allPieceVal.get(curRotation);
+			this.curPiece = allRotations.get(curRotation);
 
 		}
 		//DEBUG DEBUG
@@ -345,7 +355,7 @@ public class Board extends JPanel implements KeyListener {
 
 		//rotation
 		case (KeyEvent.VK_K):
-			rotation();
+			nextRotation();
 			break;
 		//change Piece(DEBUG)
 //		case (KeyEvent.VK_I):
