@@ -1,19 +1,36 @@
 package tetris_original;
 
+import java.util.ArrayList;
+
 public class test {
 
 	public static void main(String[] args) {
+		
+		
+		ArrayList<int[]> sample = new ArrayList<int[]>();
+		sample.add(new int[2]);
+		sample.get(0)[0]=1;
+		System.out.println(sample.get(0)[0]);
+		sample.add(sample.get(0));
+		sample.get(0)[0]+=1;
+		System.out.println(sample.get(1)[0]);
+
+		
+	}
 //		test test = new test();
 //
 //		int[][] samples = {{1,0},{0,2},{3,0},{2,3}};
 //		ArrayList<int[][]> sampleArr = new ArrayList<int[][]>();
-//
 //		sampleArr.add(samples);
-//		sampleArr.add(test.exchange(sampleArr.get(0)));
+//		for(int i=0; i<3; i++) {
+//			
+//			sampleArr.add(test.exchange(sampleArr.get(i)));
 //
-//		samples = sampleArr.get(1);
+//		}
+//		
+//		samples = sampleArr.get(0);
 //
-//
+//		
 //
 //		for(int[] i:samples) {
 //			System.out.print("(");
@@ -22,36 +39,22 @@ public class test {
 //			}
 //			System.out.print(")");
 //		}
-
-		boolean f = true;
-		int x = 0;
-		while (f) {
-			System.out.println("input");
-			x = new java.util.Scanner(System.in).nextInt();
-			switch(x) {
-			case 1:
-				System.out.println(1);
-				break;
-			case 2:
-				System.out.println("exit");
-				f = false;
-				break;
-			}
-		}
-
-
-
-
-		// TODO 自動生成されたメソッド・スタブ
-
-	}
-	public int[][] exchange(int[][] sample) {
-		for(int i=0;i<sample.length;i++) {
-			int temp = sample[i][0];
-			sample[i][0] = sample[i][1];
-			sample[i][1] = temp;
-		}
-		return sample;
-	}
+//
+//	
+//
+//
+//
+//
+//		// TODO 自動生成されたメソッド・スタブ
+//
+//	}
+//	public int[][] exchange(int[][] sample) {
+//		for(int i=0;i<sample.length;i++) {
+//			int temp = sample[i][0];
+//			sample[i][0] = sample[i][1];
+//			sample[i][1] = temp;
+//		}
+//		return sample;
+//	}
 
 }

@@ -33,10 +33,6 @@ public class Board extends JPanel implements KeyListener {
 	private int HEIGHT = 20;
 	private int blockPx = 0;
 
-	/**全ての回転の形を格納するリスト*/
-	private ArrayList<int[][]> allRotations =new  ArrayList<int[][]>();
-	/**0ー３まで*/
-	private int curRotation;
 
 	private Shape shape;
 	private int[][] curPiece;
@@ -81,144 +77,62 @@ public class Board extends JPanel implements KeyListener {
 		//動作するピースの二次元配列をShapeオブジェクトから取得
 		curPiece = shape.getPiece();
 
-		setAllVal(curPiece);
-
-		//DEBUG DEBUG
-//		for(int[][] i: allRotations) {
-//			for(int[] n: i) {
-//				for(int x: n)
-//				System.out.print(x+",");
-//			}
-//			System.out.print("..");
-//		}
-//		System.out.println("");
-
-		curRotation = 0;
-
 		curX = WIDTH / 2;
 		curY = 2;
 		System.out.println(curPiece + " NEWWW");
 	}
 
 
-	/**一つのピースに対する全ての回転の形をArraylistに格納
-	 * @param piece
+	/**y=x, x=(-y) の変換を行っている
+	 *
 	 */
-	public void setAllVal(int[][] piece) {
-		this.allRotations.add(piece);
+	public int[][] computeRotation(int[][] piece) {
+		int[][] nextPiece = new int[4][2];
+		for(int i=0; i<4;i++) {
 
-		//ここまでは正常に動いてる（allPieceValに正しい値が入ってる）
-		for(int i=0; i<3; i++) {
-			int[][] temp = computeRotation(this.allRotations.get(i));
-			this.allRotations.add(temp);
-//			for(int[] x: allPieceVal.get(i+1)) {
-//				for(int n: x) {
-//					System.out.print(n+",");
-//				}
-//				System.out.print("..");
-//			}
-//			System.out.println("");
-		}
-		for(int[][] i: allRotations) {
-			for(int[] n: i) {
-				for(int x: n)
-				System.out.print(x+",");
-			}
-			System.out.print("..");
-		}
-		System.out.println("");
-
-
-
-
-	}
-
-	/**curRotation変数をインクリメントし、次の回転の形をcurPieceに代入、*/
-	public void nextRotation() {
-		if (curRotation==2) {
-
-			curRotation = 0;
-			this.curPiece = allRotations.get(curRotation);
-		}
-		else{
-			curRotation += 1;
-			this.curPiece = allRotations.get(curRotation);
+			nextPiece[i][1] = piece[i][0];
+			nextPiece[i][0] = piece[i][1];
 
 		}
-		//DEBUG DEBUG
-//		for(int[] i: curPiece) {
-//			for(int n: i) {
-//				System.out.print(n+",");
-//			}
-//			System.out.print("..");
-//		}
-//		System.out.println("");
 
+		return nextPiece;
 	}
 
 
 	//return current Piece max width (はみ出さないように
-	public int minX() {
-		int min = curPiece[0][0];
+	public int minX(int[][] piece) {
+		int min = piece[0][0];
 		for (int i = 0; i < 4; i++) {
-			min = Math.min(min, curPiece[i][0]);
+			min = Math.min(min, piece[i][0]);
 		}
 		return min;
 	}
-	public int maxX() {
-		int max = curPiece[0][0];
+	public int maxX(int[][] piece) {
+		int max = piece[0][0];
 		for (int i = 0; i < 4; i++) {
-			max = Math.max(max, curPiece[i][0]);
+			max = Math.max(max, piece[i][0]);
 		}
 		return max;
 	}
 
 	//return max y coord of Piece(下端の検出）
-	public int maxY() {
-		int max = curPiece[0][1];
+	public int maxY(int[][] piece) {
+		int max = piece[0][1];
 		for (int i = 0; i < 4; i++) {
-			max = Math.max(max, curPiece[i][1]);
+			max = Math.max(max, piece[i][1]);
 		}
 		return max;
 	}
 
 
-	//
-	/**y=x, x=(-y) の変換を行っている
-	 *
-	 */
-	public int[][] computeRotation(int[][] piece) {
-
-		for(int i=0; i<4;i++) {
-
-			int tempY = -(piece[i][1]);
-			piece[i][1] = piece[i][0];
-			piece[i][0] = tempY;
-
-		}
-
-//		for(int[] i: curPiece) {
-//			for(int n: i) {
-//				System.out.print(n+",");
-//			}
-//			System.out.print("..");
-//		}
-//		System.out.println("");
-
-
-		return piece;
-	}
-
-
 
 	//Blockが次の移動先でかぶるかどうか。４つすべて見ている。
-	public boolean hitCheck(int newX, int newY) {
+	public boolean hitCheck(int newX, int newY, int[][] piece) {
 		for(int i=0; i<4; i++) {
-			if(board[curPiece[i][1]+curY+newY]
-					[curPiece[i][0]+curX+newX]==1) {
+			if(board[piece[i][1]+curY+newY]
+					[piece[i][0]+curX+newX]==1) {
 				return false;
 			}
-
 		}
 		return true;
 	}
@@ -229,25 +143,33 @@ public class Board extends JPanel implements KeyListener {
 	 * @param x 方向に応じたX増加量
 	 * @param y 方向に応じたY増加量
 	 */
-	public void tryMoveLR(int newX, int newY) {
+	public boolean tryMoveLR(int newX, int newY, int[][] piece) {
 		//			System.out.println("curx"+curX);
 		//			System.out.println("cury"+curY);
 
 		//newXは絶対値ではないのでそのまま足していいはず？
-		int leftX = curX+minX()+newX;
-		int rightX = curX+maxX()+newX;
+		int leftX = curX+minX(piece)+newX;
+		int rightX = curX+maxX(piece)+newX;
 
-		int bottomY = curY+maxY()+newY;
+		int bottomY = curY+maxY(piece)+newY;
 
 		//これがTrueなら次の移動先は少なくともボードの範囲内
 		if ((0 <= leftX && rightX <= WIDTH - 1)
 				&& bottomY<=HEIGHT-1 ){
-			if(hitCheck(newX, newY)) {
+			if(hitCheck(newX, newY,piece)) {
 				curX+=newX;
 				curY+=newY;
 				repaint();
+				return true;
+			}
+			else {
+				return false;
 			}
 		}
+		else {
+			return false;
+		}
+		
 	}
 
 	/**下に移動できるかどうか判定したのちcurYを更新
@@ -256,8 +178,8 @@ public class Board extends JPanel implements KeyListener {
 	 * @param newY
 	 */
 	public void tryMoveDown(int newX, int newY) {
-		int bottomY = curY+maxY()+newY;
-		if(bottomY<=HEIGHT-1&&(hitCheck(newX,newY))) {
+		int bottomY = curY+maxY(curPiece)+newY;
+		if(bottomY<=HEIGHT-1&&(hitCheck(newX,newY,curPiece))) {
 			curY+=1;
 
 		}
@@ -341,7 +263,7 @@ public class Board extends JPanel implements KeyListener {
 		int keycode = e.getKeyCode();
 		switch (keycode) {
 		case (KeyEvent.VK_A):
-			tryMoveLR(-1, 0);
+			tryMoveLR(-1, 0, curPiece);
 			break;
 
 		case (KeyEvent.VK_S):
@@ -350,12 +272,14 @@ public class Board extends JPanel implements KeyListener {
 			break;
 
 		case (KeyEvent.VK_D):
-			tryMoveLR(1, 0);
+			tryMoveLR(1, 0, curPiece);
 			break;
 
 		//rotation
 		case (KeyEvent.VK_K):
-			nextRotation();
+			if(tryMoveLR(0,0,computeRotation(curPiece))) {
+				curPiece = computeRotation(curPiece);
+			}
 			break;
 		//change Piece(DEBUG)
 //		case (KeyEvent.VK_I):
