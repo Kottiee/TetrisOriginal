@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -21,6 +22,10 @@ public class Board extends JPanel implements KeyListener {
 
 	/** Wxh unit board grid*/
 	int[][] board;
+	private int[] highestY = new int[10];
+	private boolean[] filledLines = new boolean[20];
+	private boolean[] removedLines =  new boolean[20];
+	
 	Timer timer;
 	ScheduleTask task;
 
@@ -79,7 +84,6 @@ public class Board extends JPanel implements KeyListener {
 
 		curX = WIDTH / 2;
 		curY = 2;
-		System.out.println(curPiece + " NEWWW");
 	}
 
 
@@ -91,10 +95,9 @@ public class Board extends JPanel implements KeyListener {
 		for(int i=0; i<4;i++) {
 
 			nextPiece[i][1] = piece[i][0];
-			nextPiece[i][0] = piece[i][1];
+			nextPiece[i][0] = -piece[i][1];
 
 		}
-
 		return nextPiece;
 	}
 
@@ -203,9 +206,61 @@ public class Board extends JPanel implements KeyListener {
 			board[curY + curPiece[i][1]]
 					[curX + curPiece[i][0]] = 1;
 		}
+		int filledGrids = 0;
+		boolean filledFlag = false;
+		for (int y = 0; y < board.length; y++) {
+			filledGrids = 0;
+			for (int x = 0; x < board[y].length; x++) {
+				if(board[y][x]==1) {
+					filledGrids+=1;
+//					System.out.print(filledGrids); debug
+				}
+			}
+//			System.out.println(""); debug
+			if(filledGrids ==10) {
+				filledFlag = true;
+				filledLines[y] = true;
+				filledGrids = 0;
+			}
+		}
+		if(filledFlag) {
+//			System.out.println("filled");
+			removeLine();
+		}
+		
+		
 		newPiece();
-
 	}
+	
+	public void removeLine() {
+		int removeCount = 0; //ブロックをいくつ下げるか
+		int removeStartedY = -1; //ブロックをどこから下げるのに使う
+		for(int i=0; i<filledLines.length;i++) {
+			if(filledLines[i]) {
+				Arrays.fill(board[i], 0);
+				removedLines[i] = true;
+				if(removeStartedY<0) {
+					removeStartedY = i;
+				}
+				removeCount+=1;
+			}
+			 
+		}
+		Arrays.fill(filledLines, false);
+		levelDecrease(removeStartedY, removeCount);
+	}
+	public void levelDecrease(int start, int counts) {
+		System.out.println("start "+start+"; counts "+counts);
+		for (int y = start-1; y > 0; y--) {
+			for (int x = 0; x < board[y].length; x++) {
+				board[y+counts][x] = board[y][x];
+				
+
+			}
+		}
+	}
+
+
 
 	/**デバッグ用の座標表示システム
 	 * @param g
@@ -303,7 +358,7 @@ public class Board extends JPanel implements KeyListener {
 	private class ScheduleTask extends TimerTask{
 		@Override
 		public void run() {
-//			tryMoveDown(0, 1);
+			tryMoveDown(0, 1);
 
 		}
 	}

@@ -1,5 +1,7 @@
 package tetris_original;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JFrame;
 
 public class Main {
@@ -12,6 +14,7 @@ public class Main {
 	public void init() {
 		JFrame frame = new JFrame();
 		Board board = new Board();
+		frame.setLayout(new BorderLayout());
 //		status = new JLabel("test");
 //		frame.add(status, new BorderLayout().CENTER);
 		frame.add(board);
