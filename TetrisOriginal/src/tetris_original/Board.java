@@ -23,21 +23,21 @@ public class Board extends JPanel implements KeyListener {
 	/** Wxh unit board grid*/
 	int[][] board;
 	private int[] highestY = new int[10];
-	private boolean[] filledLines = new boolean[20];
-	private boolean[] removedLines =  new boolean[20];
+	
+	
+	private int score = 0;
 	
 	Timer timer;
 	ScheduleTask task;
-
-	public JLabel status;
-	private Main parent;
-
+	
 	private int board_W = 300;
-	private int board_H = 600;
+	private int board_H = 660;
 	private int WIDTH = 10;
-	private int HEIGHT = 20;
+	private int HEIGHT = 22;
 	private int blockPx = 0;
 
+	private boolean[] filledLines;
+	private boolean[] removedLines;
 
 	private Shape shape;
 	private int[][] curPiece;
@@ -47,6 +47,7 @@ public class Board extends JPanel implements KeyListener {
 
 	private boolean isStarted = false;
 	private boolean isPaused = false;
+	private boolean isGameOver = false;
 
 //////////////////////////////////////////////////////////
 
@@ -54,23 +55,19 @@ public class Board extends JPanel implements KeyListener {
 		setFocusable(true);
 		blockPx = board_W / WIDTH;
 		board = new int[HEIGHT][WIDTH];
-
-//		status = new JLabel("test");
-//		add(status,new BorderLayout().SOUTH);
-
+		setSize(board_W,board_H);
 		//Pieceを初期化
 		newPiece();
-
 		addKeyListener(this);
-		timer = new Timer();
-		task = new ScheduleTask();
-		timer.scheduleAtFixedRate(task, 300, 300);
-
+//		timer = new Timer();
+//		task = new ScheduleTask();
+//		timer.scheduleAtFixedRate(task, 300, 300);
+//		
 	}
 
 
 
-	/** WindowのサイズをDimension型で返す */
+	/** BoardのサイズをDimension型で返す */
 	public Dimension getWHSize() {
 		return new Dimension(board_W,board_H);
 	}
@@ -200,27 +197,42 @@ public class Board extends JPanel implements KeyListener {
 		repaint();
 
 	}
-	/**Pieceの着地処理。着地点のboard座標に1を代入し、newPieceで新しいPieceを作る*/
+	/**Pieceの着地処理。着地点のboard座標に1を代入し、newPieceで新しいPieceを作る
+	 * 並行してFilledlinesの判定もおこなう
+	 * */
 	public void dropped() {
+		
+		//boardのY座標は、curY(Pieceの現在位置）とそのPieceの各BlockのY座標を足したものに当たるので次のような式になる。
 		for (int i = 0; i < 4; i++) {
 			board[curY + curPiece[i][1]]
 					[curX + curPiece[i][0]] = 1;
+			if(curY+curPiece[i][1] == 1) {
+				System.out.println(curY+curPiece[i][1]);
+				gameOver();
+			}
 		}
-		int filledGrids = 0;
+		
+		
+		filledLines = new boolean[board_H];
+		//行が埋まっているか判断するためのカウントナンバー
+		int filles = 0;
+		//行が埋まっているかのFlag
 		boolean filledFlag = false;
+		// Boardを行ごとに走査し、1が入った要素をfillesに格納し、fillesの数でfilled or notを判定。fillssは行ごとに初期化する
 		for (int y = 0; y < board.length; y++) {
-			filledGrids = 0;
+			filles = 0;
 			for (int x = 0; x < board[y].length; x++) {
 				if(board[y][x]==1) {
-					filledGrids+=1;
+					filles+=1;
 //					System.out.print(filledGrids); debug
 				}
 			}
 //			System.out.println(""); debug
-			if(filledGrids ==10) {
+			//fillesが１０であるということは埋まった行があるので何行めが埋まったか記録
+			if(filles ==10) {
 				filledFlag = true;
 				filledLines[y] = true;
-				filledGrids = 0;
+				filles = 0;
 			}
 		}
 		if(filledFlag) {
@@ -232,7 +244,9 @@ public class Board extends JPanel implements KeyListener {
 		newPiece();
 	}
 	
+	/**列を消去*/
 	public void removeLine() {
+		removedLines = new boolean[board_H];
 		int removeCount = 0; //ブロックをいくつ下げるか
 		int removeStartedY = -1; //ブロックをどこから下げるのに使う
 		for(int i=0; i<filledLines.length;i++) {
@@ -248,6 +262,7 @@ public class Board extends JPanel implements KeyListener {
 		}
 		Arrays.fill(filledLines, false);
 		levelDecrease(removeStartedY, removeCount);
+		addScore(removeCount);
 	}
 	public void levelDecrease(int start, int counts) {
 		System.out.println("start "+start+"; counts "+counts);
@@ -258,6 +273,13 @@ public class Board extends JPanel implements KeyListener {
 
 			}
 		}
+	}
+	
+	/**Score加算
+	 * @param removeCount
+	 */
+	public void addScore(int removeCount) {
+		score += 10*removeCount*removeCount;
 	}
 
 
@@ -286,12 +308,29 @@ public class Board extends JPanel implements KeyListener {
 		g.setFont(new Font("TimesRoman", Font.BOLD, 20));
 		g.drawString(String.valueOf(curX+" "+curY), 30, board_H-30);
 	}
+	public void paintGUI(Graphics g) {
+		g.setColor(Color.red);
 
+		g.setFont(new Font("TimesRoman", Font.BOLD, 20));
+		g.drawString("Score : "+score, 200, 50);
+		if(isPaused) {
+			g.setFont(new Font("TimesRoman", Font.BOLD, 30));
+			g.drawString("Pause", 130, 300);	
 
+		}
+		if(!isStarted) {
+			g.setFont(new Font("TimesRoman", Font.BOLD, 30));
+			g.drawString("Press X to start", 50, 270);
+		}
+		if(isGameOver) {
+			g.drawString("GameOver", 75, 300);
+		}		
+	}
+	
 	public void paintComponent(Graphics g) {
 		//この一文は重要。これがないと前のPaintが残ってしまう。
 		super.paintComponent(g);
-		debugPaint(g);
+//		debugPaint(g);
 		//Draw Dropped Pieces
 		g.setColor(Color.black);
 		for (int y = 0; y < board.length; y++) {
@@ -309,32 +348,95 @@ public class Board extends JPanel implements KeyListener {
 			//				System.out.println(x + " " + y);
 			g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
 		}
+		paintGUI(g);
 	}
-	//
+	public void start() {
+		//if(!isStarted&&!isPaused) {	
+			for(int y=0; y<board.length; y++) {
+				for(int x=0; x<board[y].length; x++) {
+					board[y][x] = 0;
+				}
+			}
+			resume();
+			isStarted = true;
+			isGameOver = false;
+			System.out.println("DEBUG: game started, isGameOver flag is false");
+	
+		//}
+	}
+	
+	public void pause() {
+		if(!isPaused) {
+			isPaused = true;
+			timer.cancel();
+			repaint();
+			System.out.println("DEBUG: game paused");
+			
+		}
+		else {
+			resume();
+			isPaused = false;
+			System.out.println("DEBUG: game resume");
+			
+		}
+
+	}
+	
+	public void gameOver() {	
+		if(isStarted) {
+			timer.cancel();
+			repaint();
+			isStarted = false;
+			isGameOver = true;		
+		}
+	}
+	
+	private void resume() {
+		timer = new Timer();
+		task = new ScheduleTask();
+		timer.scheduleAtFixedRate(task, 0, 500);
+	}
+	
 
 	//keylisten and move
 	@Override
 	public void keyPressed(KeyEvent e) {
+		
 		int keycode = e.getKeyCode();
 		switch (keycode) {
 		case (KeyEvent.VK_A):
-			tryMoveLR(-1, 0, curPiece);
+			if(!isPaused&&isStarted) {
+				tryMoveLR(-1, 0, curPiece);
+				
+			}
 			break;
-
 		case (KeyEvent.VK_S):
-			tryMoveDown(0, 1);
-
+			if(!isPaused&&isStarted) {
+				tryMoveDown(0, 1);
+				
+			}
 			break;
-
 		case (KeyEvent.VK_D):
-			tryMoveLR(1, 0, curPiece);
+			if(!isPaused&&isStarted) {
+				tryMoveLR(1, 0, curPiece);
+				
+			}
 			break;
 
 		//rotation
 		case (KeyEvent.VK_K):
-			if(tryMoveLR(0,0,computeRotation(curPiece))) {
-				curPiece = computeRotation(curPiece);
+			if(!isPaused&&isStarted) {
+				if(tryMoveLR(0,0,computeRotation(curPiece))) {
+					curPiece = computeRotation(curPiece);
+					
+				}
 			}
+			break;
+		case (KeyEvent.VK_P):
+			pause();
+			break;
+		case (KeyEvent.VK_L):
+			start();
 			break;
 		//change Piece(DEBUG)
 //		case (KeyEvent.VK_I):
@@ -357,8 +459,11 @@ public class Board extends JPanel implements KeyListener {
 
 	private class ScheduleTask extends TimerTask{
 		@Override
+		
 		public void run() {
-			tryMoveDown(0, 1);
+			
+				tryMoveDown(0, 1);
+			
 
 		}
 	}

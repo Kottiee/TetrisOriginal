@@ -1,6 +1,6 @@
 package tetris_original;
 
-import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 import javax.swing.JFrame;
 
@@ -14,16 +14,16 @@ public class Main {
 	public void init() {
 		JFrame frame = new JFrame();
 		Board board = new Board();
-		frame.setLayout(new BorderLayout());
-//		status = new JLabel("test");
-//		frame.add(status, new BorderLayout().CENTER);
+		
+		frame.setSize(400,700);
+
 		frame.add(board);
-//		frame.add(board.status);
-		frame.setSize(board.getWHSize());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
 		frame.setVisible(true);
+//		board.gameStart();
+
 	}
 
 	public static void main(String[] args) {
