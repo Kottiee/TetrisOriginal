@@ -32,6 +32,7 @@ public class Board extends JPanel implements KeyListener {
 	
 	private int board_W = 300;
 	private int board_H = 660;
+
 	private int WIDTH = 12;
 	private int HEIGHT = 22;
 	private int blockPx = 0;
