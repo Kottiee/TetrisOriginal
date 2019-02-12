@@ -15,9 +15,11 @@ public class Main {
 		JFrame frame = new JFrame();
 		Board board = new Board();
 		
-		frame.setSize(400,700);
+//		frame.setSize(400,700);
+		frame.setLocationRelativeTo(null);
 
 		frame.add(board);
+		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 

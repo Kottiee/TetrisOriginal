@@ -3,13 +3,15 @@ package tetris_original;
 import java.awt.Color;
 import java.util.Random;
 
+import tetris_original.test.shapeEnum;
+
 
 
 public class Shape {
 
 
 
-	/** One Piece composition as Coords 4x2 aray*/
+	/** ピースはそれぞれ４ｘ２の配列で表現（４点のXY座標の意味）*/
 	private int[][] piece;
 	private int[][][] coordsTable = {
 //        { { 0, 0 },   { 0, 0 },   { 0, 0 },   { 0, 0 } },
@@ -21,21 +23,46 @@ public class Shape {
         { { -1, -1 }, { 0, -1 },  { 0, 0 },   { 0, 1 } },
         { { 1, -1 },  { 0, -1 },  { 0, 0 },   { 0, 1 } }
     };
+	
+	//ColorList
+	public static final Color[] colorList = new Color[7];
 
-	private Color[] colorList = new Color[7];
+	/**外部からInt値を受け取ってその番号に応じた
+	 * @author nomad
+	 *
+	 */
+	public static enum shapeEnum {ZSHAPE, SSHAPE, ISHAPE, TSHAPE, OSHAPE, LSHAPE, mLSHAPE;
 
-	private String shapeName;
-	private enum shapeEnum {ZSHAPE, SSHAPE, ISHAPE, TSHAPE, OSHAPE, LSHAPE, mLSHAPE};
+		private static final shapeEnum[] VALUES = values();
+		
+		public static shapeEnum getRandomShapeName(int randomNum) {
+			return VALUES[randomNum];
+		}
+		
+	}
+	
+	private Color curColor;
+	private shapeEnum  shapeName;
 
 	/////////////////////////////////
-
+	//Constructor ランダムに７色生成し、ランダムなピースを生成
 	public Shape() {
+		System.out.println(colorList[0]);
 		setRandomPiece();
-
-
+		
 	}
-
-	public void initColor() {
+	//Getter
+	public shapeEnum getShapeName() {
+//		System.out.println("DEBUG :"+shapeName.name());
+		return this.shapeName;
+	}
+	public Color getCurColor() {
+		return this.curColor;
+	}
+	
+	
+	//ColorListをランダムに初期化
+	public static void initColor() {
 		for(int i = 0; i<colorList.length; i++) {
 			int r = new Random().nextInt(255);
 			int g = new Random().nextInt(255);
@@ -43,6 +70,38 @@ public class Shape {
 			colorList[i] = new Color(r,g,b);
 		}
 
+	}
+	
+	/**引数には shape.name(); でStringを渡す
+	 * @param shape
+	 * @return
+	 */
+	public static Color getColors(String shape) {
+		switch(shape) {
+		case("ZSHAPE"):
+			return colorList[0];
+			
+		case("SSHAPE"):
+			return colorList[1];
+			
+		case("ISHAPE"):
+			return colorList[2];
+			
+		case("TSHAPE"):
+			return colorList[3];
+			
+		case("OSHAPE"):
+			return colorList[4];
+			
+		case("LSHAPE"):
+			return colorList[5];
+			
+		case("mLSHAPE"):
+			return colorList[6];
+			
+		}
+		return Color.black;
+		//This is debug sign.
 	}
 
 
@@ -53,9 +112,14 @@ public class Shape {
 		return piece;
 	}
 
+	/**ピースの座標配列、Enum定数、RGB値をランダムに決定*/
 	public void setRandomPiece() {
 		int x = new Random().nextInt(coordsTable.length);
 		setPiece(x);
+		shapeName = shapeEnum.getRandomShapeName(x);
+		System.out.println("DEBUG: shapeName is"+ shapeEnum.getRandomShapeName(x));
+		curColor = colorList[x];
+		
 	}
 
 //

@@ -31,8 +31,11 @@ public class test {
 
 	public static void main (String [] args) {
 
-		shapeEnum[] vals = shapeEnum.values();
+		
+		shapeEnum[] vals = new shapeEnum[10];
 		System.out.println(shapeEnum.getRandomShapeName());
+		System.out.println(vals[0]);
+		shapeEnum store = shapeEnum.LSHAPE;
 		
 	}
 //	public int myf() {

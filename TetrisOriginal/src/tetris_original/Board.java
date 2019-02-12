@@ -21,8 +21,11 @@ public class Board extends JPanel implements KeyListener {
 
 
 	/** Wxh unit board grid*/
-	int[][] board;
+	Shape.shapeEnum[][] board;
+	private Color backColor = new Color(20,0,25);
+//	int[][] board;
 	private int[] highestY = new int[10];
+	
 	
 	
 	private int score = 0;
@@ -55,8 +58,9 @@ public class Board extends JPanel implements KeyListener {
 	public Board() {
 		setFocusable(true);
 		blockPx = board_W / WIDTH;
-		board = new int[HEIGHT][WIDTH];
-		setSize(board_W,board_H);
+		board = new Shape.shapeEnum[HEIGHT][WIDTH];
+		this.setPreferredSize(new Dimension(board_W,board_H));
+//		setSize(board_W,board_H);
 		//Pieceを初期化
 		newPiece();
 		addKeyListener(this);
@@ -127,11 +131,12 @@ public class Board extends JPanel implements KeyListener {
 
 
 
-	//Blockが次の移動先でかぶるかどうか。４つすべて見ている。
+	//現在のピースの各ブロックとすでに設置されたブロックが被らないかをチェック
+	//Enum配列の空のIndexはNullである
 	public boolean hitCheck(int newX, int newY, int[][] piece) {
 		for(int i=0; i<4; i++) {
 			if(board[piece[i][1]+curY+newY]
-					[piece[i][0]+curX+newX]==1) {
+					[piece[i][0]+curX+newX]!=null) {
 				return false;
 			}
 		}
@@ -199,7 +204,7 @@ public class Board extends JPanel implements KeyListener {
 		repaint();
 
 	}
-	/**Pieceの着地処理。着地点のboard座標に1を代入し、newPieceで新しいPieceを作る
+	/**Pieceの着地処理。着地点のboard座標に現在のShapeNameを代入し、newPieceで新しいPieceを作る
 	 * 並行してFilledlinesの判定もおこなう
 	 * */
 	public void dropped() {
@@ -207,7 +212,7 @@ public class Board extends JPanel implements KeyListener {
 		//boardのY座標は、curY(Pieceの現在位置）とそのPieceの各BlockのY座標を足したものに当たるので次のような式になる。
 		for (int i = 0; i < 4; i++) {
 			board[curY + curPiece[i][1]]
-					[curX + curPiece[i][0]] = 1;
+					[curX + curPiece[i][0]] = shape.getShapeName();
 			if(curY+curPiece[i][1] == 1) {
 				System.out.println(curY+curPiece[i][1]);
 				gameOver();
@@ -224,7 +229,7 @@ public class Board extends JPanel implements KeyListener {
 		for (int y = 0; y < board.length; y++) {
 			filles = 0;
 			for (int x = 0; x < board[y].length; x++) {
-				if(board[y][x]==1) {
+				if(board[y][x]!=null) {
 					filles+=1;
 //					System.out.print(filledGrids); debug
 				}
@@ -253,7 +258,7 @@ public class Board extends JPanel implements KeyListener {
 		int removeStartedY = -1; //ブロックをどこから下げるのに使う
 		for(int i=0; i<filledLines.length;i++) {
 			if(filledLines[i]) {
-				Arrays.fill(board[i], 0);
+				Arrays.fill(board[i], null);
 				removedLines[i] = true;
 				if(removeStartedY<0) {
 					removeStartedY = i;
@@ -287,18 +292,19 @@ public class Board extends JPanel implements KeyListener {
 	public void paintComponent(Graphics g) {
 		//この一文は重要。これがないと前のPaintが残ってしまう。
 		super.paintComponent(g);
-		debugPaint(g);
+		setBackground(backColor);
+//		debugPaint(g);
 		//Draw Dropped Pieces
-		g.setColor(Color.black);
 		paintOutline(g);
 		for (int y = 0; y < board.length; y++) {
 			for (int x = 0; x < board[y].length; x++) {
-				if (board[y][x] == 1) {
+				if (board[y][x] != null) {
+					g.setColor(Shape.getColors(board[y][x].name()));
 					g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
 				}
 			}
 		}
-
+		g.setColor(shape.getCurColor());
 		//Draw current moving piece
 		for (int i = 0; i < 4; i++) {
 			int x = curX + curPiece[i][0];
@@ -358,6 +364,7 @@ public class Board extends JPanel implements KeyListener {
 	}
 	
 	public void paintOutline(Graphics g) {
+		g.setColor(Color.gray);
 		for (int y = 0; y < board.length; y++) {
 			for (int x = 0; x < board[y].length; x++) {
 				if(y==0||y==HEIGHT-1) {
@@ -375,9 +382,10 @@ public class Board extends JPanel implements KeyListener {
 	
 	public void start() {
 		if(!isStarted&&!isPaused) {	
+			Shape.initColor();
 			for(int y=0; y<board.length; y++) {
 				for(int x=0; x<board[y].length; x++) {
-					board[y][x] = 0;
+					board[y][x] = null;
 				}
 			}
 			resume();
