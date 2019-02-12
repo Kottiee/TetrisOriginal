@@ -1,4 +1,4 @@
-package tetris_original;
+package explain_draw;
 
 import java.awt.Color;
 import java.util.Random;
