@@ -1,5 +1,7 @@
 package tetris_original;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.util.Random;
 
 
@@ -20,6 +22,11 @@ public class Shape {
         { { -1, -1 }, { 0, -1 },  { 0, 0 },   { 0, 1 } },
         { { 1, -1 },  { 0, -1 },  { 0, 0 },   { 0, 1 } }
     };
+	
+	private Color[] colorList = new Color[7];
+	
+	private enum Shapes  {ZSHAPE, SSHAPE, ISHAPE, TSHAPE, OSHAPE, LSHAPE, mLSHAPE};
+	
 	/////////////////////////////////
 
 	public Shape() {
@@ -27,7 +34,16 @@ public class Shape {
 
 
 	}
-
+	
+	public void initColor() {
+		for(int i = 0; i<colorList.length; i++) {
+			int r = new Random().nextInt(255);
+			int g = new Random().nextInt(255);
+			int b = new Random().nextInt(255);
+			colorList[i] = new Color(r,g,b);
+		}
+		
+	}
 
 
 	public void setPiece(int index) {

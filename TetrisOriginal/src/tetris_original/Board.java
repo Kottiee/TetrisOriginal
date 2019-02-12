@@ -32,7 +32,7 @@ public class Board extends JPanel implements KeyListener {
 	
 	private int board_W = 300;
 	private int board_H = 660;
-	private int WIDTH = 10;
+	private int WIDTH = 12;
 	private int HEIGHT = 22;
 	private int blockPx = 0;
 
@@ -154,8 +154,9 @@ public class Board extends JPanel implements KeyListener {
 		int bottomY = curY+maxY(piece)+newY;
 
 		//これがTrueなら次の移動先は少なくともボードの範囲内
-		if ((0 <= leftX && rightX <= WIDTH - 1)
-				&& bottomY<=HEIGHT-1 ){
+		//outlineのオフセット分も考慮する
+		if ((1 <= leftX && rightX <= WIDTH - 2)
+				&& bottomY<=HEIGHT-2 ){
 			if(hitCheck(newX, newY,piece)) {
 				curX+=newX;
 				curY+=newY;
@@ -179,7 +180,7 @@ public class Board extends JPanel implements KeyListener {
 	 */
 	public void tryMoveDown(int newX, int newY) {
 		int bottomY = curY+maxY(curPiece)+newY;
-		if(bottomY<=HEIGHT-1&&(hitCheck(newX,newY,curPiece))) {
+		if(bottomY<=HEIGHT-2&&(hitCheck(newX,newY,curPiece))) {
 			curY+=1;
 
 		}
@@ -281,6 +282,31 @@ public class Board extends JPanel implements KeyListener {
 	public void addScore(int removeCount) {
 		score += 10*removeCount*removeCount;
 	}
+	
+	public void paintComponent(Graphics g) {
+		//この一文は重要。これがないと前のPaintが残ってしまう。
+		super.paintComponent(g);
+		debugPaint(g);
+		//Draw Dropped Pieces
+		g.setColor(Color.black);
+		paintOutline(g);
+		for (int y = 0; y < board.length; y++) {
+			for (int x = 0; x < board[y].length; x++) {
+				if (board[y][x] == 1) {
+					g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
+				}
+			}
+		}
+
+		//Draw current moving piece
+		for (int i = 0; i < 4; i++) {
+			int x = curX + curPiece[i][0];
+			int y = curY + curPiece[i][1];
+			//				System.out.println(x + " " + y);
+			g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
+		}
+		paintGUI(g);
+	}
 
 
 
@@ -308,6 +334,9 @@ public class Board extends JPanel implements KeyListener {
 		g.setFont(new Font("TimesRoman", Font.BOLD, 20));
 		g.drawString(String.valueOf(curX+" "+curY), 30, board_H-30);
 	}
+	
+	
+	/**GUI表示用のPaintメソッド */
 	public void paintGUI(Graphics g) {
 		g.setColor(Color.red);
 
@@ -327,31 +356,24 @@ public class Board extends JPanel implements KeyListener {
 		}		
 	}
 	
-	public void paintComponent(Graphics g) {
-		//この一文は重要。これがないと前のPaintが残ってしまう。
-		super.paintComponent(g);
-//		debugPaint(g);
-		//Draw Dropped Pieces
-		g.setColor(Color.black);
+	public void paintOutline(Graphics g) {
 		for (int y = 0; y < board.length; y++) {
 			for (int x = 0; x < board[y].length; x++) {
-				if (board[y][x] == 1) {
-					g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
+				if(y==0||y==HEIGHT-1) {
+					g.fillRect((x * blockPx)+1 , (y * blockPx) + 1, blockPx - 2, blockPx - 2);
+				}
+				if(x==0||x==board[y].length-1) {
+				g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
 				}
 			}
 		}
-
-		//Draw current moving piece
-		for (int i = 0; i < 4; i++) {
-			int x = curX + curPiece[i][0];
-			int y = curY + curPiece[i][1];
-			//				System.out.println(x + " " + y);
-			g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
-		}
-		paintGUI(g);
 	}
+	
+	
+	
+	
 	public void start() {
-		//if(!isStarted&&!isPaused) {	
+		if(!isStarted&&!isPaused) {	
 			for(int y=0; y<board.length; y++) {
 				for(int x=0; x<board[y].length; x++) {
 					board[y][x] = 0;
@@ -362,7 +384,7 @@ public class Board extends JPanel implements KeyListener {
 			isGameOver = false;
 			System.out.println("DEBUG: game started, isGameOver flag is false");
 	
-		//}
+		}
 	}
 	
 	public void pause() {
@@ -448,12 +470,10 @@ public class Board extends JPanel implements KeyListener {
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 	@Override
 	public void keyReleased(KeyEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
