@@ -32,8 +32,8 @@ public class Board extends JPanel implements KeyListener {
 	
 	private int board_W = 300;
 	private int board_H = 660;
-	private int WIDTH = 10;
-	private int HEIGHT = 22;
+	private int WIDTH = 50;
+	private int HEIGHT = 50;
 	private int blockPx = 0;
 
 	private boolean[] filledLines;
@@ -351,7 +351,7 @@ public class Board extends JPanel implements KeyListener {
 		paintGUI(g);
 	}
 	public void start() {
-		//if(!isStarted&&!isPaused) {	
+		if(!isStarted&&!isPaused) {	
 			for(int y=0; y<board.length; y++) {
 				for(int x=0; x<board[y].length; x++) {
 					board[y][x] = 0;
@@ -362,7 +362,7 @@ public class Board extends JPanel implements KeyListener {
 			isGameOver = false;
 			System.out.println("DEBUG: game started, isGameOver flag is false");
 	
-		//}
+		}
 	}
 	
 	public void pause() {
