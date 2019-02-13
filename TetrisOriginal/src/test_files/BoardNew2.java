@@ -1,15 +1,23 @@
-package explain_draw;
+package test_files;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.util.Timer;
+import java.util.TimerTask;
 
 // Using Swing's components and containers
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class BoardNew extends JFrame{
-	 static int board_W = 300;
+public class BoardNew2 extends JFrame{
+
+	//Timer関係
+	Timer timer;
+	ScheduleTask task;
+
+
+	static int board_W = 300;
 	 static int board_H = 660;
 	 int WIDTH = 12;
 	 int HEIGHT = 22;
@@ -21,17 +29,23 @@ public class BoardNew extends JFrame{
 	 int[][] board = new int[WIDTH][HEIGHT];
 	 int[][] piece = {{ 0, -1 },  { 0, 0 },   { -1, 0 },  { -1, 1 }};
 
-	public BoardNew() {
+	public BoardNew2() {
 
 		setSize(board_W,board_H);
 
 		canvas = new Canvas();
 		canvas.setPreferredSize(new Dimension(board_W,board_H));
 		add(canvas);
+
+		timer = new Timer();
+		task = new ScheduleTask();
+		timer.schedule(task, 0, 700);
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		setVisible(true);
 	}
+
 
 	private class Canvas extends JPanel{
 		@Override
@@ -55,11 +69,25 @@ public class BoardNew extends JFrame{
 		}
 	}
 
+	public void moveDown(){
+		curY+=1;
+		repaint();
+	}
+
 
 	public static  void main(String [] args) {
-		BoardNew board = new BoardNew();
+		BoardNew2 board = new BoardNew2();
 
 
+	}
+
+	//TimerTaskを継承したクラス
+	private class ScheduleTask extends TimerTask{
+		//runメソッドをオーバーライド
+		@Override
+		public void run() {
+			moveDown();
+		}
 	}
 
 

@@ -1,4 +1,4 @@
-package tetris_original;
+package test_files;
 
 import java.awt.Color;
 import java.awt.Graphics;

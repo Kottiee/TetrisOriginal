@@ -20,30 +20,35 @@ public class Board extends JPanel implements KeyListener {
 
 
 
-	/** Wxh unit board grid*/
+	/** この二次元配列に接地したピースを記録する。配列の各要素はshapeEnum型、つまり７種類の定数もしくはNullのどれかになる*/
 	Shape.shapeEnum[][] board;
+	/**背景色用のColorクラスインスタンス */
 	private Color backColor = new Color(20,0,25);
-//	int[][] board;
-	private int[] highestY = new int[10];
 	
-	
+//	private int[] highestY = new int[10];
 	
 	private int score = 0;
 	
 	Timer timer;
 	ScheduleTask task;
 	
+	//Boardの縦横ピクセルサイズ
 	private int board_W = 300;
-	private int board_H = 660;
+	private int board_H = 550;
 
 	private int WIDTH = 12;
 	private int HEIGHT = 22;
+	//今のところBlockは正四角形とするのでフィールド変数は一つにする。
 	private int blockPx = 0;
+//	private int blockPxH = 0;
 
+	/**行番号とIndexが対応しており、埋まった行にTrueを入れる*/
 	private boolean[] filledLines;
 	private boolean[] removedLines;
 
+	/**Shapeクラスのインスタンス。つまりはBoard上で稼働しているピース。常に一つがBoardに存在するようになる*/
 	private Shape shape;
+	/**現在稼働しているpieceを4つのxy座標で表したもの。Shapeクラスのpiece変数のコピーが入る*/
 	private int[][] curPiece;
 	/**Pieceの現在位置X*/
 	private int curX;
@@ -54,28 +59,29 @@ public class Board extends JPanel implements KeyListener {
 	private boolean isGameOver = false;
 
 //////////////////////////////////////////////////////////
-
+	//Constructor
 	public Board() {
+		//この宣言はこのコンストラクによって生成されるインスタンスがキーボードに反応するために必要
 		setFocusable(true);
 		blockPx = board_W / WIDTH;
+//		blockPxH = board_H / HEIGHT;
+		//ここでboard二次元配列が全値Nullで初期化
 		board = new Shape.shapeEnum[HEIGHT][WIDTH];
 		this.setPreferredSize(new Dimension(board_W,board_H));
-//		setSize(board_W,board_H);
-		//Pieceを初期化
+		Shape.initColor();
+		
 		newPiece();
+		//keyboardからのイベントに反応するためのListener。thisを引数に入れることでこのコンストラクタで生成されるインスタンスがListenerをAddされることになる。
 		addKeyListener(this);
-//		timer = new Timer();
-//		task = new ScheduleTask();
-//		timer.scheduleAtFixedRate(task, 300, 300);
-//		
+	
 	}
 
 
-
-	/** BoardのサイズをDimension型で返す */
-	public Dimension getWHSize() {
-		return new Dimension(board_W,board_H);
-	}
+//	//getter
+//	/** BoardのサイズをDimension型（Componentの縦横を表す整数２個）で返す (今んとこ不要）*/
+//	public Dimension getBoardPxSize() {
+//		return new Dimension(board_W,board_H);
+//	}
 
 	//create new Piece .board[][]のIndexはそれぞれx,y座標を表しており、piece[][]のIndexもそれぞれx,y座標を表しているのでこのようになる。
 	public void newPiece() {
@@ -84,6 +90,8 @@ public class Board extends JPanel implements KeyListener {
 		//動作するピースの二次元配列をShapeオブジェクトから取得
 		curPiece = shape.getPiece();
 
+		//落ちてくるピースの初期位置を決定するアサインステイトメント。width/2することでほぼ中央から落とすことを表す
+		//Yを２にする理由はcurPiece配列がマイナス値を含むため
 		curX = WIDTH / 2;
 		curY = 2;
 	}
@@ -104,7 +112,12 @@ public class Board extends JPanel implements KeyListener {
 	}
 
 
-	//return current Piece max width (はみ出さないように
+	
+	/**curPieceのｘ座標の最小値を求める。枠からはみ出さないようにするために必要。
+	 * ｘ座標とはつまりpiece[i][0]のこと。[i][1]はy座標を表している。
+	 * @param piece
+	 * @return
+	 */
 	public int minX(int[][] piece) {
 		int min = piece[0][0];
 		for (int i = 0; i < 4; i++) {
@@ -133,8 +146,17 @@ public class Board extends JPanel implements KeyListener {
 
 	//現在のピースの各ブロックとすでに設置されたブロックが被らないかをチェック
 	//Enum配列の空のIndexはNullである
+	/**
+	 * @param newX　押したキーの方向などに応じたXの増減
+	 * @param newY	押したキーの方向などに応じたYの増減
+	 * @param piece 現在のピース配列
+	 * @return
+	 */
 	public boolean hitCheck(int newX, int newY, int[][] piece) {
 		for(int i=0; i<4; i++) {
+			//この式は、つまりboard[i]はｙなので、piece[i][1]と現在のピースに位置であるcurY、引数に受け取ったｙの増減を表すnewY
+			//それらを全て足すことによって、もし移動が承認された場合の各ブロックの位置を求めている。もしその位置にnullでない、つまり
+			//すでに接地したブロックがあれば、移動はできないのでfalseを返す。
 			if(board[piece[i][1]+curY+newY]
 					[piece[i][0]+curX+newX]!=null) {
 				return false;
@@ -163,6 +185,7 @@ public class Board extends JPanel implements KeyListener {
 		//outlineのオフセット分も考慮する
 		if ((1 <= leftX && rightX <= WIDTH - 2)
 				&& bottomY<=HEIGHT-2 ){
+			//さらにHitcheckを行って移動先にすでにブロックがないことを確認
 			if(hitCheck(newX, newY,piece)) {
 				curX+=newX;
 				curY+=newY;
@@ -180,7 +203,7 @@ public class Board extends JPanel implements KeyListener {
 	}
 
 	/**下に移動できるかどうか判定したのちcurYを更新
-	 * FalseならDroppedを呼ぶ
+	 * FalseならDroppedを呼びピースを接地させる。
 	 * @param newX hitCheckに渡すために必要
 	 * @param newY
 	 */
@@ -193,6 +216,7 @@ public class Board extends JPanel implements KeyListener {
 		else {
 			dropped();
 		}
+		//このrepaintは必要ないかも
 		repaint();
 
 	}
@@ -221,7 +245,8 @@ public class Board extends JPanel implements KeyListener {
 		
 		
 		filledLines = new boolean[board_H];
-		//行が埋まっているか判断するためのカウントナンバー
+		
+		//ある行に存在するブロックの数を数えることにより行のFilled or notを判定
 		int filles = 0;
 		//行が埋まっているかのFlag
 		boolean filledFlag = false;
@@ -271,6 +296,10 @@ public class Board extends JPanel implements KeyListener {
 		levelDecrease(removeStartedY, removeCount);
 		addScore(removeCount);
 	}
+	/**行を消去したあと、残った上部分を下げる。
+	 * @param start
+	 * @param counts
+	 */
 	public void levelDecrease(int start, int counts) {
 		System.out.println("start "+start+"; counts "+counts);
 		for (int y = start-1; y > 0; y--) {
@@ -282,29 +311,36 @@ public class Board extends JPanel implements KeyListener {
 		}
 	}
 	
-	/**Score加算
+	/**Score加算　同時に消した行が多いほど高得点！
 	 * @param removeCount
 	 */
 	public void addScore(int removeCount) {
 		score += 10*removeCount*removeCount;
 	}
 	
+	/* (非 Javadoc) このメソッドはピースの描画の核になっている。移動中のピースを描くロジックと接地済みブロックを描くロジックは分かれている。
+	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+	 */
 	public void paintComponent(Graphics g) {
-		//この一文は重要。これがないと前のPaintが残ってしまう。
+		//この一文は重要。これがないと前のPaintの軌跡が残ってしまう。
 		super.paintComponent(g);
 		setBackground(backColor);
+		//debugpaintを有効にすればグリッドとその番号を直接表示する。
 //		debugPaint(g);
 		//Draw Dropped Pieces
 		paintOutline(g);
 		for (int y = 0; y < board.length; y++) {
 			for (int x = 0; x < board[y].length; x++) {
 				if (board[y][x] != null) {
+					//board[y][x]にある定数の名前をStringで取得し、それをShapeクラスのgetColorsメソッドに渡すことでColorを取得して色を決定する。
 					g.setColor(Shape.getColors(board[y][x].name()));
 					g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
 				}
 			}
 		}
 		g.setColor(shape.getCurColor());
+//		System.out.println("DEBUG" +shape.getCurColor());
+		
 		//Draw current moving piece
 		for (int i = 0; i < 4; i++) {
 			int x = curX + curPiece[i][0];
@@ -382,7 +418,6 @@ public class Board extends JPanel implements KeyListener {
 	
 	public void start() {
 		if(!isStarted&&!isPaused) {	
-			Shape.initColor();
 			for(int y=0; y<board.length; y++) {
 				for(int x=0; x<board[y].length; x++) {
 					board[y][x] = null;
@@ -416,12 +451,16 @@ public class Board extends JPanel implements KeyListener {
 	public void gameOver() {	
 		if(isStarted) {
 			timer.cancel();
-			repaint();
 			isStarted = false;
-			isGameOver = true;		
+			isGameOver = true;
+			repaint();
+			//repaint()をフラッグ変更の直後に入れることで、paintGUIメソッドでの条件式がすぐさま働くようになる
 		}
 	}
 	
+	/**PauseやGameoverでTimerをキャンセルしてTimerオブジェクトを消去するのでResumeではインスタンスの作成を行う。
+	 * Timer関係をここで一括管理することでスレッドの乱立などに対処を容易にする。
+	 */
 	private void resume() {
 		timer = new Timer();
 		task = new ScheduleTask();
@@ -432,7 +471,8 @@ public class Board extends JPanel implements KeyListener {
 	//keylisten and move
 	@Override
 	public void keyPressed(KeyEvent e) {
-		
+		//keyが押下されるとKyePressedが駆動する。
+		//KeyEventクラスオブジェクト のGetKeyCodeメソッドにより、キーボードのキーに対応したint型の整数を受け取る
 		int keycode = e.getKeyCode();
 		switch (keycode) {
 		case (KeyEvent.VK_A):
@@ -466,7 +506,7 @@ public class Board extends JPanel implements KeyListener {
 		case (KeyEvent.VK_P):
 			pause();
 			break;
-		case (KeyEvent.VK_L):
+		case (KeyEvent.VK_X):
 			start();
 			break;
 		//change Piece(DEBUG)
@@ -476,7 +516,8 @@ public class Board extends JPanel implements KeyListener {
 		}
 
 	}
-
+	
+	//この二つはKeyListenerを継承したクラスでは必ずオーバーライドしなくてはならない
 	@Override
 	public void keyTyped(KeyEvent e) {
 
@@ -485,12 +526,12 @@ public class Board extends JPanel implements KeyListener {
 	public void keyReleased(KeyEvent e) {
 
 	}
-
+	
+	//runメソッドをオーバーライドするためにTimerTaskを継承したクラスが必要
 	private class ScheduleTask extends TimerTask{
 		@Override
-		
-		public void run() {
-			
+		public void run() {		
+			//この中にフレームごとに行う作業（描画以外）を書く
 				tryMoveDown(0, 1);
 			
 
