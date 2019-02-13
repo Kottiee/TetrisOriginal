@@ -11,11 +11,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class BoardNew2 extends JFrame{
-	
+
+	//Timer関係
 	Timer timer;
 	ScheduleTask task;
-	
-	
+
+
 	static int board_W = 300;
 	 static int board_H = 660;
 	 int WIDTH = 12;
@@ -35,16 +36,16 @@ public class BoardNew2 extends JFrame{
 		canvas = new Canvas();
 		canvas.setPreferredSize(new Dimension(board_W,board_H));
 		add(canvas);
-		
+
 		timer = new Timer();
 		task = new ScheduleTask();
 		timer.schedule(task, 0, 700);
-		
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		setVisible(true);
 	}
-	
+
 
 	private class Canvas extends JPanel{
 		@Override
@@ -67,7 +68,7 @@ public class BoardNew2 extends JFrame{
 			}
 		}
 	}
-	
+
 	public void moveDown(){
 		curY+=1;
 		repaint();
@@ -79,8 +80,10 @@ public class BoardNew2 extends JFrame{
 
 
 	}
-	
+
+	//TimerTaskを継承したクラス
 	private class ScheduleTask extends TimerTask{
+		//runメソッドをオーバーライド
 		@Override
 		public void run() {
 			moveDown();
