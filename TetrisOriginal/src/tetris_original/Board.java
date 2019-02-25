@@ -8,11 +8,14 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -57,10 +60,24 @@ public class Board extends JPanel implements KeyListener {
 	private boolean isStarted = false;
 	private boolean isPaused = false;
 	private boolean isGameOver = false;
+	
+	
+	String bgm = "bin/tetris_original/tetris_Wavefile.wav"; 
+	SoundPlayer bgmPlayer;
+
 
 //////////////////////////////////////////////////////////
 	//Constructor
 	public Board() {
+		
+		try {
+			bgmPlayer = new SoundPlayer(bgm);
+		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+		
+		
 		//この宣言はこのコンストラクによって生成されるインスタンスがキーボードに反応するために必要
 		setFocusable(true);
 		blockPx = board_W / WIDTH;
@@ -326,7 +343,7 @@ public class Board extends JPanel implements KeyListener {
 		super.paintComponent(g);
 		setBackground(backColor);
 		//debugpaintを有効にすればグリッドとその番号を直接表示する。
-//		debugPaint(g);
+		debugPaint(g);
 		//Draw Dropped Pieces
 		paintOutline(g);
 		for (int y = 0; y < board.length; y++) {
@@ -367,32 +384,32 @@ public class Board extends JPanel implements KeyListener {
 			g.drawLine(0, i*blockPx, WIDTH*blockPx, i*blockPx);
 		}
 		//Draw Grid coords for DEBUG
-		g.setColor(Color.red);
+		g.setColor(Color.white);
 		for (int y = 0; y < board.length; y++) {
 			for (int x = 0; x < board[y].length; x++) {
 				g.drawString(x+","+y, x*blockPx, y*blockPx+20);
 			}
 		}
 		g.setColor(Color.black);
-		g.setFont(new Font("TimesRoman", Font.BOLD, 20));
+		g.setFont(new Font("SansSerif", Font.BOLD, 20));
 		g.drawString(String.valueOf(curX+" "+curY), 30, board_H-30);
 	}
 	
 	
 	/**GUI表示用のPaintメソッド */
 	public void paintGUI(Graphics g) {
-		g.setColor(Color.red);
+		g.setColor(Color.white);
 
-		g.setFont(new Font("TimesRoman", Font.BOLD, 20));
+		g.setFont(new Font("SansSerif", Font.BOLD, 20));
 		g.drawString("Score : "+score, 200, 50);
 		if(isPaused) {
-			g.setFont(new Font("TimesRoman", Font.BOLD, 30));
-			g.drawString("Pause", 130, 300);	
+			g.setFont(new Font("SansSerif", Font.BOLD, 30));
+			g.drawString("Pause", 100, 300);	
 
 		}
 		if(!isStarted) {
-			g.setFont(new Font("TimesRoman", Font.BOLD, 30));
-			g.drawString("Press X to start", 50, 270);
+			g.setFont(new Font("SansSerif", Font.BOLD, 30));
+			g.drawString("Press X to start", 30, 270);
 		}
 		if(isGameOver) {
 			g.drawString("GameOver", 75, 300);
@@ -424,6 +441,7 @@ public class Board extends JPanel implements KeyListener {
 				}
 			}
 			resume();
+			bgmPlayer.play();
 			isStarted = true;
 			isGameOver = false;
 			System.out.println("DEBUG: game started, isGameOver flag is false");
@@ -432,15 +450,17 @@ public class Board extends JPanel implements KeyListener {
 	}
 	
 	public void pause() {
-		if(!isPaused) {
+		if((!isPaused) && isStarted) {
 			isPaused = true;
 			timer.cancel();
+			bgmPlayer.pause();
 			repaint();
 			System.out.println("DEBUG: game paused");
 			
 		}
-		else {
+		else if (isPaused){
 			resume();
+			bgmPlayer.resumeAudio();
 			isPaused = false;
 			System.out.println("DEBUG: game resume");
 			
@@ -451,6 +471,8 @@ public class Board extends JPanel implements KeyListener {
 	public void gameOver() {	
 		if(isStarted) {
 			timer.cancel();
+			bgmPlayer.stop();
+			bgmPlayer.resetAudioStream();
 			isStarted = false;
 			isGameOver = true;
 			repaint();
