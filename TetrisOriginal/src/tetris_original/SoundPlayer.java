@@ -84,7 +84,9 @@ public class SoundPlayer
 
 		status = "play"; 
 		System.out.println(status);
-	} 
+	}
+	
+	
 	
 	// Method to pause the audio 
 	public void pause() 

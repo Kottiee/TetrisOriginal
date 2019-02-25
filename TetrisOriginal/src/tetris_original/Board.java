@@ -62,8 +62,10 @@ public class Board extends JPanel implements KeyListener {
 	private boolean isGameOver = false;
 	
 	
-	String bgm = "bin/tetris_original/tetris_Wavefile.wav"; 
+	String bgmfile = "bin/tetris_original/tetris_Wavefile.wav";
+	String hitfile = "bin/tetris_original/hit.wav";
 	SoundPlayer bgmPlayer;
+	SoundPlayer hitSound;
 
 
 //////////////////////////////////////////////////////////
@@ -71,7 +73,8 @@ public class Board extends JPanel implements KeyListener {
 	public Board() {
 		
 		try {
-			bgmPlayer = new SoundPlayer(bgm);
+			
+			bgmPlayer = new SoundPlayer(bgmfile);
 		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
@@ -250,12 +253,23 @@ public class Board extends JPanel implements KeyListener {
 	 * */
 	public void dropped() {
 		
+		//play hit sound effect 
+		try {
+			hitSound = new SoundPlayer(hitfile);
+			hitSound.clip.start();
+		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+		
 		//boardのY座標は、curY(Pieceの現在位置）とそのPieceの各BlockのY座標を足したものに当たるので次のような式になる。
 		for (int i = 0; i < 4; i++) {
 			board[curY + curPiece[i][1]]
 					[curX + curPiece[i][0]] = shape.getShapeName();
+			
+			//Y座標が１であればGameOver
 			if(curY+curPiece[i][1] == 1) {
-				System.out.println(curY+curPiece[i][1]);
+				System.out.println("DEBUG dropped method each block's current y is "+curY+curPiece[i][1]);
 				gameOver();
 			}
 		}
@@ -343,7 +357,7 @@ public class Board extends JPanel implements KeyListener {
 		super.paintComponent(g);
 		setBackground(backColor);
 		//debugpaintを有効にすればグリッドとその番号を直接表示する。
-		debugPaint(g);
+//		debugPaint(g);
 		//Draw Dropped Pieces
 		paintOutline(g);
 		for (int y = 0; y < board.length; y++) {
