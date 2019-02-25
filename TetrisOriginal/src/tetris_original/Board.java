@@ -61,26 +61,15 @@ public class Board extends JPanel implements KeyListener {
 	private boolean isPaused = false;
 	private boolean isGameOver = false;
 	
-	
-	String bgmfile = "bin/tetris_original/tetris_Wavefile.wav";
-	String hitfile = "bin/tetris_original/hit.wav";
-	SoundPlayer bgmPlayer;
-	SoundPlayer hitSound;
-
+	private Sounds sounds;
 
 //////////////////////////////////////////////////////////
 	//Constructor
 	public Board() {
 		
-		try {
-			
-			bgmPlayer = new SoundPlayer(bgmfile);
-		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
-		
-		
+		//Initializing sounds;
+		sounds = new Sounds();
+				
 		//この宣言はこのコンストラクによって生成されるインスタンスがキーボードに反応するために必要
 		setFocusable(true);
 		blockPx = board_W / WIDTH;
@@ -254,13 +243,7 @@ public class Board extends JPanel implements KeyListener {
 	public void dropped() {
 		
 		//play hit sound effect 
-		try {
-			hitSound = new SoundPlayer(hitfile);
-			hitSound.clip.start();
-		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
+		sounds.hitSound.playOnce();
 		
 		//boardのY座標は、curY(Pieceの現在位置）とそのPieceの各BlockのY座標を足したものに当たるので次のような式になる。
 		for (int i = 0; i < 4; i++) {
@@ -275,13 +258,14 @@ public class Board extends JPanel implements KeyListener {
 		}
 		
 		
+		//何行目が埋まったか示すBoolean配列
 		filledLines = new boolean[board_H];
 		
 		//ある行に存在するブロックの数を数えることにより行のFilled or notを判定
 		int filles = 0;
 		//行が埋まっているかのFlag
 		boolean filledFlag = false;
-		// Boardを行ごとに走査し、1が入った要素をfillesに格納し、fillesの数でfilled or notを判定。fillssは行ごとに初期化する
+		// Boardを行ごとに走査し、1が入った要素をfillsに格納し、fillsの数でfilled or notを判定。fillssは行ごとに初期化する
 		for (int y = 0; y < board.length; y++) {
 			filles = 0;
 			for (int x = 0; x < board[y].length; x++) {
@@ -326,6 +310,9 @@ public class Board extends JPanel implements KeyListener {
 		Arrays.fill(filledLines, false);
 		levelDecrease(removeStartedY, removeCount);
 		addScore(removeCount);
+		
+		//sound effect 
+		sounds.filledSound.playOnce();
 	}
 	/**行を消去したあと、残った上部分を下げる。
 	 * @param start
@@ -455,7 +442,7 @@ public class Board extends JPanel implements KeyListener {
 				}
 			}
 			resume();
-			bgmPlayer.play();
+			sounds.bgmSound.play();
 			isStarted = true;
 			isGameOver = false;
 			System.out.println("DEBUG: game started, isGameOver flag is false");
@@ -467,14 +454,14 @@ public class Board extends JPanel implements KeyListener {
 		if((!isPaused) && isStarted) {
 			isPaused = true;
 			timer.cancel();
-			bgmPlayer.pause();
+			sounds.bgmSound.pause();
 			repaint();
 			System.out.println("DEBUG: game paused");
 			
 		}
 		else if (isPaused){
 			resume();
-			bgmPlayer.resumeAudio();
+			sounds.bgmSound.resumeAudio();
 			isPaused = false;
 			System.out.println("DEBUG: game resume");
 			
@@ -485,8 +472,9 @@ public class Board extends JPanel implements KeyListener {
 	public void gameOver() {	
 		if(isStarted) {
 			timer.cancel();
-			bgmPlayer.stop();
-			bgmPlayer.resetAudioStream();
+			sounds.gameOverSound.playOnce();
+			sounds.bgmSound.stop();
+			sounds.bgmSound.resetAudioStream();
 			isStarted = false;
 			isGameOver = true;
 			repaint();

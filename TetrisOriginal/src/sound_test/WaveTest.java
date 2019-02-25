@@ -1,4 +1,4 @@
-package test_files;
+package sound_test;
 
 
 import java.io.File; 
@@ -13,7 +13,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class WaveTest
 { 
-
+	
+	//アクセス修飾子がPrivateでないと再生するクリップが不安定になる。
 	// to store current position 
 	Long currentFrame; 
 	Clip clip; 
@@ -22,16 +23,18 @@ public class WaveTest
 	String status; 
 	
 	AudioInputStream audioInputStream; 
-	static String filePath; 
+	String filePath; 
 
 	// constructor to initialize streams and clip 
-	public WaveTest() 
+	public WaveTest(String path) 
 		throws UnsupportedAudioFileException, 
 		IOException, LineUnavailableException 
 	{ 
 		// create AudioInputStream object 
+		filePath = path;
+		
 		audioInputStream = 
-				AudioSystem.getAudioInputStream(new File(filePath).getAbsoluteFile()); 
+				AudioSystem.getAudioInputStream(new File(this.filePath).getAbsoluteFile()); 
 		
 		// create clip reference 
 		clip = AudioSystem.getClip(); 
@@ -39,46 +42,15 @@ public class WaveTest
 		// open audioInputStream to the clip 
 		clip.open(audioInputStream); 
 		
-		clip.loop(Clip.LOOP_CONTINUOUSLY); 
+		
+		
 	} 
 
-	public static void main(String[] args) 
-	{ 
-		try
-		{ 
-			filePath = "bin/test_files/tetris_Wavefile.wav"; 
-			WaveTest audioPlayer = 
-							new WaveTest(); 
-			
-			audioPlayer.play(); 
-			Scanner sc = new Scanner(System.in); 
-			
-			while (true) 
-			{ 
-				System.out.println("1. pause"); 
-				System.out.println("2. resume"); 
-				System.out.println("3. restart"); 
-				System.out.println("4. stop"); 
-				System.out.println("5. Jump to specific time"); 
-				int c = sc.nextInt(); 
-				audioPlayer.gotoChoice(c); 
-				if (c == 4) 
-				break; 
-			} 
-			sc.close(); 
-		} 
-		
-		catch (Exception ex) 
-		{ 
-			System.out.println("Error with playing sound."); 
-			ex.printStackTrace(); 
-		
-		} 
-	} 
+	
 	
 	// Work as the user enters his choice 
 	
-	private void gotoChoice(int c) 
+	public void gotoChoice(int c) 
 			throws IOException, LineUnavailableException, UnsupportedAudioFileException 
 	{ 
 		switch (c) 
@@ -102,6 +74,14 @@ public class WaveTest
 				long c1 = sc.nextLong(); 
 				jump(c1); 
 				break; 
+			case 6:
+				play();
+				break;
+			case 7:
+				playAtOnce();
+				break;
+				
+				
 	
 		} 
 	
@@ -110,10 +90,13 @@ public class WaveTest
 	// Method to play the audio 
 	public void play() 
 	{ 
-		//start the clip 
-		clip.start(); 
 		
-		status = "play"; 
+		//
+		this.clip.loop(Clip.LOOP_CONTINUOUSLY); 
+		//start the clip 
+		this.clip.start(); 
+		
+		this.status = "play"; 
 	} 
 	
 	// Method to pause the audio 
@@ -126,8 +109,8 @@ public class WaveTest
 		} 
 		this.currentFrame = 
 		this.clip.getMicrosecondPosition(); 
-		clip.stop(); 
-		status = "paused"; 
+		this.clip.stop(); 
+		this.status = "paused"; 
 	} 
 	
 	// Method to resume the audio 
@@ -140,9 +123,9 @@ public class WaveTest
 			"being played"); 
 			return; 
 		} 
-		clip.close(); 
-		resetAudioStream(); 
-		clip.setMicrosecondPosition(currentFrame); 
+		this.clip.close(); 
+		this.resetAudioStream(); 
+		this.clip.setMicrosecondPosition(currentFrame); 
 		this.play(); 
 	} 
 	
@@ -189,7 +172,14 @@ public class WaveTest
 		audioInputStream = AudioSystem.getAudioInputStream( 
 		new File(filePath).getAbsoluteFile()); 
 		clip.open(audioInputStream); 
-		clip.loop(Clip.LOOP_CONTINUOUSLY); 
+		
+		//ループ再生はPlayメソッドに任せる
+//		clip.loop(Clip.LOOP_CONTINUOUSLY); 
 	} 
+	//setMicrosecondPositionでStreamを巻き戻すのがポイント
+	public void playAtOnce() {
+		clip.setMicrosecondPosition(0);
+		clip.start();
+	}
 
 } 

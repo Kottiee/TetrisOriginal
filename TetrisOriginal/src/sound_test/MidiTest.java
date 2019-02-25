@@ -1,4 +1,4 @@
-package test_files;
+package sound_test;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

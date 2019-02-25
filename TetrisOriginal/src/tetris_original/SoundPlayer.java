@@ -18,14 +18,14 @@ public class SoundPlayer
 { 
 
 	// to store current position 
-	Long currentFrame; 
-	Clip clip; 
+	private Long currentFrame; 
+	private Clip clip; 
 	
 	// current status of clip 
-	String status = " "; 
+	private String status = " "; 
 	
-	AudioInputStream audioInputStream; 
-	String filePath; 
+	private AudioInputStream audioInputStream; 
+	private String filePath; 
 	
 	
 	/**コンストラクタ。Fileパスを渡してSoundPlayerオブジェクトを生成する。
@@ -46,38 +46,8 @@ public class SoundPlayer
 		
 	} 
 
-	// Work as the user enters his choice 
 	
-	private void gotoChoice(int c) 
-			throws IOException, LineUnavailableException, UnsupportedAudioFileException 
-	{ 
-		switch (c) 
-		{ 
-			case 1: 
-				pause(); 
-				break; 
-			case 2: 
-				resumeAudio(); 
-				break; 
-			case 3: 
-				restart(); 
-				break; 
-			case 4: 
-				stop(); 
-				break; 
-			case 5: 
-				System.out.println("Enter time (" + 0 + 
-				", " + clip.getMicrosecondLength() + ")"); 
-				Scanner sc = new Scanner(System.in); 
-				long c1 = sc.nextLong(); 
-				jump(c1); 
-				break; 
-	
-		} 
-	
-	} 
-	
-	// Method to play the audio 
+	// Method to loop play the clip 
 	public void play() 
 	{ 
 		clip.loop(Clip.LOOP_CONTINUOUSLY); 
@@ -85,7 +55,11 @@ public class SoundPlayer
 		status = "play"; 
 		System.out.println(status);
 	}
-	
+	//Method to play the audio one time
+	public void playOnce() {
+		clip.setMicrosecondPosition(0);
+		clip.start();
+	}
 	
 	
 	// Method to pause the audio 
@@ -171,39 +145,4 @@ public class SoundPlayer
 		
 
 } 
-
-
-
-//public static void main(String[] args) 
-//{ 
-//	try
-//	{ 
-//		SoundPlayer audioPlayer = 
-//						new SoundPlayer(); 
-//		
-//		audioPlayer.play(); 
-//		Scanner sc = new Scanner(System.in); 
-//		
-//		while (true) 
-//		{ 
-//			System.out.println("1. pause"); 
-//			System.out.println("2. resume"); 
-//			System.out.println("3. restart"); 
-//			System.out.println("4. stop"); 
-//			System.out.println("5. Jump to specific time"); 
-//			int c = sc.nextInt(); 
-//			audioPlayer.gotoChoice(c); 
-//			if (c == 4) 
-//			break; 
-//		} 
-//		sc.close(); 
-//	} 
-//	
-//	catch (Exception ex) 
-//	{ 
-//		System.out.println("Error with playing sound."); 
-//		ex.printStackTrace(); 
-//	
-//	} 
-//} 
 
