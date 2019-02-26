@@ -7,3 +7,6 @@ http://cslibrary.stanford.edu/112/
 
 
 Simple Tetris implementation by a newbie Java student. /tetris_original is the source files directory. Need to compile if you want to try this.
+
+# Change Log
+2019.2.25 -- BGM and sound effects added.  Thanks to [@Yusuke2349](https://github.com/Yusuke2349) for BGM file.
