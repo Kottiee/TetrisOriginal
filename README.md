@@ -18,6 +18,7 @@ Left -- Aキー
 Right -- Dキー  
 回転　-- Kキー  
 
+![ss](https://user-images.githubusercontent.com/10685736/53441466-428c6980-3a4a-11e9-85a9-45aff583daa2.png)
 
 ## ChangeLog
 2019.2.25 -- BGM and sound effects added.  Thanks to [@Yusuke2349](https://github.com/Yusuke2349) for BGM file.  
