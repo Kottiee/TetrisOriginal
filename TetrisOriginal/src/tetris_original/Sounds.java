@@ -6,11 +6,15 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class Sounds {
-
-	String bgmfile = "bin/tetris_original/tetris_Wavefile.wav";
-	String hitfile = "bin/tetris_original/hit.wav";
-	String filledfile = "bin/tetris_original/clearLine.wav";
-	String gameOverFile = "bin/tetris_original/gameOver.wav";
+//
+//	String bgmfile = "bin/tetris_original/tetris_Wavefile.wav";
+//	String hitfile = "bin/tetris_original/hit.wav";
+//	String filledfile = "bin/tetris_original/clearLine.wav";
+//	String gameOverFile = "bin/tetris_original/gameOver.wav";
+	String bgmfile = "/tetris_Wavefile.wav";
+	String hitfile = "/hit.wav";
+	String filledfile = "/clearLine.wav";
+	String gameOverFile = "/gameOver.wav";
 	SoundPlayer bgmSound;
 	SoundPlayer hitSound;
 	SoundPlayer filledSound;

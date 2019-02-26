@@ -8,15 +8,11 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class Board extends JPanel implements KeyListener {
@@ -61,7 +57,11 @@ public class Board extends JPanel implements KeyListener {
 	private boolean isPaused = false;
 	private boolean isGameOver = false;
 	
+	//it stores sound files
 	private Sounds sounds;
+	
+	private BufferedImage bufferedImage;
+
 
 //////////////////////////////////////////////////////////
 	//Constructor
@@ -77,7 +77,7 @@ public class Board extends JPanel implements KeyListener {
 		//ここでboard二次元配列が全値Nullで初期化
 		board = new Shape.shapeEnum[HEIGHT][WIDTH];
 		this.setPreferredSize(new Dimension(board_W,board_H));
-		Shape.initColor();
+//		Shape.initColor();
 		
 		newPiece();
 		//keyboardからのイベントに反応するためのListener。thisを引数に入れることでこのコンストラクタで生成されるインスタンスがListenerをAddされることになる。
@@ -254,6 +254,7 @@ public class Board extends JPanel implements KeyListener {
 			if(curY+curPiece[i][1] == 1) {
 				System.out.println("DEBUG dropped method each block's current y is "+curY+curPiece[i][1]);
 				gameOver();
+				return;
 			}
 		}
 		
@@ -335,10 +336,13 @@ public class Board extends JPanel implements KeyListener {
 	public void addScore(int removeCount) {
 		score += 10*removeCount*removeCount;
 	}
+
+	
 	
 	/* (非 Javadoc) このメソッドはピースの描画の核になっている。移動中のピースを描くロジックと接地済みブロックを描くロジックは分かれている。
 	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
 	 */
+	@Override
 	public void paintComponent(Graphics g) {
 		//この一文は重要。これがないと前のPaintの軌跡が残ってしまう。
 		super.paintComponent(g);
@@ -350,13 +354,20 @@ public class Board extends JPanel implements KeyListener {
 		for (int y = 0; y < board.length; y++) {
 			for (int x = 0; x < board[y].length; x++) {
 				if (board[y][x] != null) {
+					
 					//board[y][x]にある定数の名前をStringで取得し、それをShapeクラスのgetColorsメソッドに渡すことでColorを取得して色を決定する。
-					g.setColor(Shape.getColors(board[y][x].name()));
-					g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
+//					g.setColor(Shape.getColors(board[y][x].name()));
+//					g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
+					
+					//enum定数をgetBlockImageに渡してbufferedImageを取得して drawImageする
+					g.drawImage((board[y][x].getBlockImage()), x*blockPx, y*blockPx, blockPx, blockPx, null);
+
+					
+					
 				}
 			}
 		}
-		g.setColor(shape.getCurColor());
+//		g.setColor(shape.getCurColor());
 //		System.out.println("DEBUG" +shape.getCurColor());
 		
 		//Draw current moving piece
@@ -364,7 +375,9 @@ public class Board extends JPanel implements KeyListener {
 			int x = curX + curPiece[i][0];
 			int y = curY + curPiece[i][1];
 			//				System.out.println(x + " " + y);
-			g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
+//			g.fillRect((x * blockPx) + 1, (y * blockPx) + 1, blockPx - 2, blockPx - 2);
+			g.drawImage((shape.getShapeName().getBlockImage()), x*blockPx, y*blockPx, blockPx, blockPx, null);
+
 		}
 		paintGUI(g);
 	}

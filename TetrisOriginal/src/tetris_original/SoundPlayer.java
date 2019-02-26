@@ -1,14 +1,14 @@
 package tetris_original;
 
 
-import java.io.File; 
-import java.io.IOException; 
-import java.util.Scanner; 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import javax.sound.sampled.AudioInputStream; 
-import javax.sound.sampled.AudioSystem; 
-import javax.sound.sampled.Clip; 
-import javax.sound.sampled.LineUnavailableException; 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException; 
 
 /**このクラスのインスタンスはそれぞれ一つのWavファイルの制御（再生、停止など）を担当する。
@@ -36,8 +36,10 @@ public class SoundPlayer
 	{ 
 		// create AudioInputStream object 
 		this.filePath = filePath;
+		InputStream in = new BufferedInputStream(getClass().getResourceAsStream(filePath));
 		audioInputStream = 
-				AudioSystem.getAudioInputStream(new File(this.filePath).getAbsoluteFile()); 
+				AudioSystem.getAudioInputStream(in); 
+//				AudioSystem.getAudioInputStream(new File(this.filePath).getAbsoluteFile()); 
 		
 		// create clip reference 
 		clip = AudioSystem.getClip(); 
@@ -131,8 +133,9 @@ public class SoundPlayer
 	public void resetAudioStream() 
 	{ 
 		try {
-			audioInputStream = AudioSystem.getAudioInputStream( 
-			new File(filePath).getAbsoluteFile()); 
+			InputStream in = new BufferedInputStream(getClass().getResourceAsStream(filePath));
+			audioInputStream = 
+					AudioSystem.getAudioInputStream(in); 
 			clip.open(audioInputStream); 
 			//loopメソッドの呼び出しは playメソッドに任せる
 //			clip.loop(Clip.LOOP_CONTINUOUSLY);
