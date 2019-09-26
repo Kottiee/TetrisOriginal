@@ -99,7 +99,7 @@ public class Board extends JPanel implements KeyListener {
 		//動作するピースの二次元配列をShapeオブジェクトから取得
 		curPiece = shape.getPiece();
 
-		//落ちてくるピースの初期位置を決定するアサインステイトメント。width/2することでほぼ中央から落とすことを表す
+		
 		//Yを２にする理由はcurPiece配列がマイナス値を含むため
 		curX = WIDTH / 2;
 		curY = 2;
@@ -335,6 +335,11 @@ public class Board extends JPanel implements KeyListener {
 	public void addScore(int removeCount) {
 		score += 10*removeCount*removeCount;
 	}
+
+
+	public void resetScore(){
+		this.score = 0;
+	}
 	
 	/* (非 Javadoc) このメソッドはピースの描画の核になっている。移動中のピースを描くロジックと接地済みブロックを描くロジックは分かれている。
 	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
@@ -475,8 +480,12 @@ public class Board extends JPanel implements KeyListener {
 			sounds.gameOverSound.playOnce();
 			sounds.bgmSound.stop();
 			sounds.bgmSound.resetAudioStream();
+
+			System.out.println("DEBUG: score reset??");
+			resetScore();
 			isStarted = false;
 			isGameOver = true;
+			System.out.println("isGameOver became true");
 			repaint();
 			//repaint()をフラッグ変更の直後に入れることで、paintGUIメソッドでの条件式がすぐさま働くようになる
 		}

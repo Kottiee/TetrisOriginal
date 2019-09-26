@@ -3,11 +3,12 @@ package tetris_original;
 import java.awt.Color;
 import java.util.Random;
 
-import test_files.test.shapeEnum;
+//import test_files.test.shapeEnum;
 
 
 
 public class Shape {
+
 
 
 
@@ -48,7 +49,7 @@ public class Shape {
 	/////////////////////////////////
 	//Constructor ランダムに７色生成し、ランダムなピースを生成
 	public Shape() {
-		System.out.println(colorList[0]);
+		//System.out.println(colorList[0]);
 		setRandomPiece();
 		
 	}
